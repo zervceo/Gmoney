@@ -1,0 +1,49 @@
+name: Weekly sales report
+
+on:
+  schedule:
+    # Every Monday at 13:00 UTC
+    - cron: "0 13 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Sync Shopify orders (make sure data is fresh)
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+        run: python scripts/sync_sales.py
+
+      - name: Regenerate dashboard
+        run: python scripts/generate_dashboard.py
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "gmoney-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sales.csv data/summary.json docs/index.html
+          git diff --cached --quiet && echo "No changes to commit" || git commit -m "Sync sales data [automated]"
+          git push || echo "Nothing to push"
+
+      - name: Post weekly report issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/weekly_report.py

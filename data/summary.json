@@ -1,0 +1,19 @@
+{
+  "last_synced_at": null,
+  "last_order_cursor": null,
+  "all_time": {
+    "orders": 0,
+    "revenue": 0.0,
+    "currency": "USD"
+  },
+  "last_7_days": {
+    "orders": 0,
+    "revenue": 0.0
+  },
+  "last_30_days": {
+    "orders": 0,
+    "revenue": 0.0
+  },
+  "by_month": {},
+  "top_products": []
+}

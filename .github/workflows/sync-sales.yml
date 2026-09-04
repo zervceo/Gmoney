@@ -1,0 +1,43 @@
+name: Sync Shopify sales
+
+on:
+  schedule:
+    # Every 6 hours
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Sync Shopify orders
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+        run: python scripts/sync_sales.py
+
+      - name: Regenerate dashboard
+        run: python scripts/generate_dashboard.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "gmoney-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sales.csv data/summary.json docs/index.html
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Sync sales data [automated]"
+          git push

@@ -1,0 +1,33 @@
+name: Sales Goal
+description: Set or update a ZERV sales goal to track progress toward
+title: "[Goal] "
+labels: ["goal"]
+body:
+  - type: input
+    id: goal-name
+    attributes:
+      label: Goal name
+      description: A short name for this goal (e.g. "Q4 2026 revenue target")
+      placeholder: "Hit $10,000 in a month"
+    validations:
+      required: true
+  - type: input
+    id: target-amount
+    attributes:
+      label: Target amount (USD)
+      placeholder: "10000"
+    validations:
+      required: true
+  - type: date
+    id: deadline
+    attributes:
+      label: Deadline
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Any context on why this goal matters or how you'll get there
+    validations:
+      required: false
